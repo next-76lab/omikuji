@@ -16,28 +16,32 @@ st.set_page_config(
     layout="centered"
 )
 
-# 共通CSS (紅白のお正月デザイン)
+# 共通CSS (紅白のお正月デザイン - iframeスクロールバー非表示)
 COMMON_STYLE = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Zen+Maru+Gothic:wght@400;700&display=swap');
 
     :root {
-        --aka: #C41E3A;           /* 紅色 */
-        --aka-light: #E04E6A;     /* 明るい紅 */
-        --shiro: #FFFAF0;         /* 白(花白) */
-        --kin: #D4AF37;           /* 金色 */
-        --kin-light: #F5E6A3;     /* 明るい金 */
-        --kuro: #2B1B17;          /* 濃い茶(墨色) */
-        --midori: #2E8B57;        /* 松の緑 */
-        --x-color: #000000;
+        --aka: #C41E3A;
+        --aka-light: #E04E6A;
+        --shiro: #FFFAF0;
+        --kin: #D4AF37;
+        --kin-light: #F5E6A3;
+        --kuro: #2B1B17;
+        --midori: #2E8B57;
     }
 
-    body {
+    * {
+        box-sizing: border-box;
+    }
+
+    html, body {
         margin: 0;
         padding: 0;
         font-family: 'Zen Maru Gothic', sans-serif;
-        background: var(--shiro);
+        background: transparent;
         color: var(--kuro);
+        overflow: hidden;
     }
 
     .result-card {
@@ -52,7 +56,6 @@ COMMON_STYLE = """
         overflow: hidden;
     }
 
-    /* 和柄の装飾（麻の葉風 背景） */
     .result-card::before {
         content: '';
         position: absolute;
@@ -139,35 +142,6 @@ COMMON_STYLE = """
         box-shadow: 0 2px 8px rgba(196, 30, 58, 0.3);
     }
 
-    /* 共有ボタンセクション */
-    .share-container {
-        margin-top: 25px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .share-button {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: var(--x-color);
-        color: white;
-        text-decoration: none;
-        padding: 10px 20px;
-        border-radius: 30px;
-        font-weight: 700;
-        font-size: 0.85rem;
-        border: none;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    .share-button:hover {
-        background: #333;
-        transform: translateY(-2px);
-    }
-
-    /* スマホ対応メディアクエリ */
     @media (max-width: 600px) {
         .fortune-main { font-size: 2.8rem; }
         .result-card { padding: 1.2rem 1rem; }
@@ -217,11 +191,33 @@ st.markdown("""
         font-family: 'Noto Serif JP', serif;
     }
     
-    /* 門松の装飾 */
     .decoration {
         text-align: center;
         font-size: 2rem;
         margin-bottom: 1rem;
+    }
+    
+    /* X共有ボタンのスタイル */
+    .share-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: #000000;
+        color: white !important;
+        text-decoration: none !important;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        margin-top: 1rem;
+    }
+    
+    .share-link:hover {
+        background: #333;
+        transform: translateY(-2px);
     }
     
     @media (max-width: 600px) {
@@ -277,7 +273,7 @@ with col2:
             st.balloons()
             st.toast("🎊 おめでとうございます！大吉です！🎊")
         
-        # HTML 構築
+        # HTML 構築（共有ボタンはiframe外に配置）
         detail_items_list = []
         for cat in categories:
             sc = random.randint(3, 5)
@@ -291,10 +287,6 @@ with col2:
             f'<div class="lucky-tag">数字: {random.randint(1, 99)}</div>'
         ]
         lucky_tags_html = "".join(lucky_tag_list)
-
-        # SNS共有用URL生成
-        share_text = f"2026年のおみくじの結果は【{res['type']}】でした！🐴\\n{res['msg']}\\n#2026年おみくじ #午年"
-        share_url = "https://twitter.com/intent/tweet?text=" + urllib.parse.quote(share_text)
 
         full_html = f"""
         {COMMON_STYLE}
@@ -310,19 +302,26 @@ with col2:
             <div class="lucky-flex">
                 {lucky_tags_html}
             </div>
-
-            <div class="share-container">
-                <a href="{share_url}" target="_top" class="share-button">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    X で結果を共有する
-                </a>
-            </div>
         </div>
         """
         
-        # iframeの高さを十分に確保
-        components.html(full_html, height=750, scrolling=True)
+        # iframeをスクロールバーなしで表示
+        components.html(full_html, height=520, scrolling=False)
         
+        # X共有ボタンをiframe外（Streamlit側）で表示
+        share_text = f"2026年のおみくじの結果は【{res['type']}】でした！🐴\n{res['msg']}\n#2026年おみくじ #午年"
+        share_url = "https://twitter.com/intent/tweet?text=" + urllib.parse.quote(share_text)
+        
+        st.markdown(f'''
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="{share_url}" target="_blank" class="share-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                X で結果を共有する
+            </a>
+        </div>
+        ''', unsafe_allow_html=True)
+        
+        st.write("")
         if st.button("🔄 もう一度引く", use_container_width=True):
             st.session_state.drawn = False
             st.rerun()
