@@ -97,7 +97,7 @@ COMMON_STYLE = """
         background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,245,238,0.9));
         border: 1px solid rgba(196, 30, 58, 0.2);
         border-radius: 12px;
-        padding: 10px;
+        padding: 10px 8px;
     }
 
     .detail-label {
@@ -109,8 +109,15 @@ COMMON_STYLE = """
 
     .detail-stars {
         color: var(--kin);
-        font-size: 1rem;
+        font-size: 0.9rem;
         letter-spacing: 1px;
+    }
+
+    .detail-comment {
+        color: #555;
+        font-size: 0.7rem;
+        margin-top: 4px;
+        line-height: 1.3;
     }
 
     .lucky-title {
@@ -236,7 +243,53 @@ fortunes = [
     {"type": "末吉", "class": "suekichi", "msg": "これからの運勢です。焦らず準備を整えることで、後半に大きなチャンスが訪れます。", "prob": 10},
 ]
 
-categories = ["💕 恋愛運", "💼 仕事運", "🏃 健康運", "💰 金運", "📚 学業運", "✈️ 旅行運"]
+# 各運勢カテゴリと一言コメントの定義
+category_comments = {
+    "💕 恋愛運": [
+        "素直な気持ちを伝えて",
+        "新しい出会いに期待",
+        "パートナーとの時間を大切に",
+        "自分磨きが吉",
+        "積極的にアプローチを"
+    ],
+    "💼 仕事運": [
+        "チームワークが鍵",
+        "新企画にチャレンジ",
+        "コツコツ努力が実る",
+        "上司への相談が吉",
+        "スキルアップの好機"
+    ],
+    "🏃 健康運": [
+        "適度な運動を心がけて",
+        "睡眠を十分に",
+        "新しい習慣を始めよう",
+        "ストレス発散が大切",
+        "健康診断を忘れずに"
+    ],
+    "💰 金運": [
+        "堅実な貯蓄が吉",
+        "思わぬ臨時収入あり",
+        "無駄遣いに注意",
+        "投資は慎重に",
+        "節約が幸運を呼ぶ"
+    ],
+    "📚 学業運": [
+        "集中力アップの兆し",
+        "新しい分野に挑戦",
+        "復習が効果的",
+        "仲間と学び合って",
+        "資格取得に最適"
+    ],
+    "✈️ 旅行運": [
+        "西方面が吉",
+        "温泉旅行がおすすめ",
+        "思い切って遠出を",
+        "近場でリフレッシュ",
+        "海外旅行に好機"
+    ]
+}
+
+categories = list(category_comments.keys())
 lucky_items_pool = ["赤い手帳", "銀のブックマーク", "森林の香り", "新しいスニーカー", "クリスタルの置物", "ミントタブレット", "お守り", "特製お餅"]
 
 # 初期化
@@ -273,12 +326,19 @@ with col2:
             st.balloons()
             st.toast("🎊 おめでとうございます！大吉です！🎊")
         
-        # HTML 構築（共有ボタンはiframe外に配置）
+        # HTML 構築（コメント付き）
         detail_items_list = []
         for cat in categories:
             sc = random.randint(3, 5)
             stars = "★" * sc + "☆" * (5 - sc)
-            detail_items_list.append(f'<div class="detail-item"><div class="detail-label">{cat}</div><div class="detail-stars">{stars}</div></div>')
+            comment = random.choice(category_comments[cat])
+            detail_items_list.append(
+                f'<div class="detail-item">'
+                f'<div class="detail-label">{cat}</div>'
+                f'<div class="detail-stars">{stars}</div>'
+                f'<div class="detail-comment">{comment}</div>'
+                f'</div>'
+            )
         detail_items_html = "".join(detail_items_list)
 
         lucky_tag_list = [
@@ -305,8 +365,8 @@ with col2:
         </div>
         """
         
-        # iframeをスクロールバーなしで表示
-        components.html(full_html, height=520, scrolling=False)
+        # iframeの高さを十分に確保（コメント追加のため高さを増加）
+        components.html(full_html, height=850, scrolling=False)
         
         # X共有ボタンをiframe外（Streamlit側）で表示
         share_text = f"2026年のおみくじの結果は【{res['type']}】でした！🐴\n{res['msg']}\n#2026年おみくじ #午年"
