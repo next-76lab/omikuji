@@ -153,7 +153,7 @@ fortunes = [
 ]
 
 categories = ["💕 恋愛運", "💼 仕事運", "🏃 健康運", "💰 金運", "📚 学業運", "✈️ 旅行運"]
-lucky_items = ["赤い手帳", "銀のブックマーク", "森林の香り", "新しいスニーカー", "クリスタルの置物", "ミントタブレット", "お守り", "特製お餅"]
+lucky_items_pool = ["赤い手帳", "銀のブックマーク", "森林の香り", "新しいスニーカー", "クリスタルの置物", "ミントタブレット", "お守り", "特製お餅"]
 
 # 初期化
 if 'drawn' not in st.session_state:
@@ -174,40 +174,50 @@ with col2:
         st.write("")
         st.info("心を落ち着けてボタンを押してください")
         if st.button("🎋 おみくじを引く 🎋", use_container_width=True):
-            with st.spinner(\'運勢を引き寄せています...\'):
+            with st.spinner('運勢を引き寄せています...'):
                 time.sleep(1.2)
                 # 抽選
-                types = [f for f in fortunes]
-                probs = [f[\'prob\'] for f in fortunes]
-                st.session_state.result = random.choices(types, weights=probs)[0]
+                st.session_state.result = random.choices(fortunes, weights=[f['prob'] for f in fortunes])[0]
                 st.session_state.drawn = True
                 st.rerun()
     else:
         res = st.session_state.result
         
-        # 大吉なら紙吹雪
-        if res[\'type\'] == "大吉":
+        # 大吉なら演出
+        if res['type'] == "大吉":
             st.balloons()
             st.toast("おめでとうございます！大吉です！")
         
-        # 結果表示
-        st.markdown(f"""
+        # HTML 構築開始
+        detail_html = ""
+        for cat in categories:
+            stars_count = random.randint(3, 5)
+            stars_html = "★" * stars_count + "☆" * (5 - stars_count)
+            detail_html += f'<div class="detail-item"><div class="detail-label">{cat}</div><div class="detail-stars">{stars_html}</div></div>\n'
+
+        lucky_tag_html = f'<div class="lucky-tag">{random.choice(lucky_items_pool)}</div>\n'
+        lucky_tag_html += f'<div class="lucky-tag">カラー: {random.choice(["金", "赤", "白", "紫"])}</div>\n'
+        lucky_tag_html += f'<div class="lucky-tag">数字: {random.randint(1, 99)}</div>'
+
+        # カード全体のHTMLを結合
+        result_card_html = f"""
         <div class="result-card">
-            <div class="fortune-main {res[\'class\']}">{res[\'type\']}</div>
-            <p style="color: white; font-size: 1rem; line-height: 1.6;">{res[\'msg\']}</p>
+            <div class="fortune-main {res['class']}">{res['type']}</div>
+            <p style="color: white; font-size: 1rem; line-height: 1.6; margin-bottom: 20px;">{res['msg']}</p>
             
             <div class="detail-grid">
-                {" ".join([f\'<div class="detail-item"><div class="detail-label">{c}</div><div class="detail-stars">{"★" * random.randint(3, 5)}{"☆" * (5 - random.randint(3, 5))}</div></div>\' for c in categories])}
+                {detail_html}
             </div>
             
             <div class="lucky-title">✨ 今週のラッキーアイテム ✨</div>
             <div class="lucky-flex">
-                <div class="lucky-tag">{random.choice(lucky_items)}</div>
-                <div class="lucky-tag">ラッキーカラー: {random.choice([\'金\', \'赤\', \'白\', \'紫\'])}</div>
-                <div class="lucky-tag">ラッキーナンバー: {random.randint(1, 99)}</div>
+                {lucky_tag_html}
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """
+        
+        # 一気に出力
+        st.markdown(result_card_html, unsafe_allow_html=True)
         
         if st.button("🔄 もう一度引く", use_container_width=True):
             st.session_state.drawn = False
@@ -216,6 +226,6 @@ with col2:
 # フッター
 st.markdown("""
 <div style="text-align: center; color: rgba(255, 255, 255, 0.4); font-size: 0.8rem; margin-top: 3rem;">
-    © 2026 新春おみくじ - 爽快に駆け抜ける一年になりますように 🐴
+    © 2026 新春おみくじ - 爽快に駆け抜けよう 🐴
 </div>
 """, unsafe_allow_html=True)
