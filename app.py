@@ -1,0 +1,221 @@
+import streamlit as st
+import random
+import time
+
+# ========================================
+# 2026年 新春おみくじアプリ (Streamlit版)
+# ========================================
+
+# ページ設定
+st.set_page_config(
+    page_title="🎍 2026年 新春おみくじ 🎍",
+    page_icon="🐴",
+    layout="centered"
+)
+
+# カスタムCSSでHTML版のリッチなデザインを再現
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Zen+Maru+Gothic:wght@400;700&display=swap');
+
+    :root {
+        --gold: #D4AF37;
+        --gold-light: #F5E6A3;
+        --crimson: #C41E3A;
+        --sakura: #FFB7C5;
+        --midnight: #0a0a1a;
+        --white: #fefefe;
+    }
+
+    /* 全体背景 */
+    .stApp {
+        background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #1a0520 100%) !important;
+    }
+
+    /* タイトルセクション */
+    .title-text {
+        font-family: 'Noto Serif JP', serif;
+        font-size: 2.5rem;
+        font-weight: 900;
+        text-align: center;
+        background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.2rem;
+        filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+    }
+
+    .subtitle-text {
+        color: var(--sakura);
+        text-align: center;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        font-family: 'Zen Maru Gothic', sans-serif;
+    }
+
+    .year-badge {
+        text-align: center;
+        background: linear-gradient(135deg, var(--crimson), #8B0000);
+        color: var(--gold-light);
+        padding: 0.4rem 1.2rem;
+        border-radius: 30px;
+        font-weight: 700;
+        width: fit-content;
+        margin: 0 auto 2rem auto;
+        box-shadow: 0 4px 15px rgba(196, 30, 58, 0.4);
+    }
+
+    /* 結果カード */
+    .result-card {
+        background: rgba(30, 20, 50, 0.7);
+        border: 2px solid var(--gold);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .fortune-main {
+        font-family: 'Noto Serif JP', serif;
+        font-size: 4rem;
+        font-weight: 900;
+        margin: 0.5rem 0;
+    }
+
+    /* 運勢色分け */
+    .daikichi { color: #FFD700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+    .chuukichi { color: #FF8C00; }
+    .kichi { color: #32CD32; }
+    .shoukichi { color: #87CEEB; }
+    .suekichi { color: #DDA0DD; }
+    .kyou { color: #DC143C; }
+
+    /* カテゴリ運勢 */
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .detail-item {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    .detail-label {
+        color: var(--gold);
+        font-size: 0.8rem;
+    }
+
+    .detail-stars {
+        color: var(--gold-light);
+        font-size: 1rem;
+    }
+
+    /* ラッキーアイテム */
+    .lucky-title {
+        color: var(--sakura);
+        font-size: 0.9rem;
+        margin: 20px 0 10px 0;
+        border-top: 1px solid rgba(212, 175, 55, 0.2);
+        padding-top: 15px;
+    }
+
+    .lucky-flex {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .lucky-tag {
+        background: rgba(212, 175, 55, 0.15);
+        color: var(--gold-light);
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        border: 1px solid var(--gold);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# データの定義
+fortunes = [
+    {"type": "大吉", "class": "daikichi", "msg": "最高の運勢です！2026年は天に昇る馬のように、何事もスピーディーに成就します。", "prob": 15},
+    {"type": "中吉", "class": "chuukichi", "msg": "素晴らしい運勢です。周囲との連携を深めることで、より高みに到達できるでしょう。", "prob": 25},
+    {"type": "吉", "class": "kichi", "msg": "良い運勢です。着実な一歩が大きな成果につながります。自信を持って進んでください。", "prob": 30},
+    {"type": "小吉", "class": "shoukichi", "msg": "まずまずの運勢です。目先の利益にとらわれず、長期的な視点で行動すると吉です。", "prob": 20},
+    {"type": "末吉", "class": "suekichi", "msg": "これからの運勢です。焦らず準備を整えることで、後半に大きなチャンスが訪れます。", "prob": 10},
+]
+
+categories = ["💕 恋愛運", "💼 仕事運", "🏃 健康運", "💰 金運", "📚 学業運", "✈️ 旅行運"]
+lucky_items = ["赤い手帳", "銀のブックマーク", "森林の香り", "新しいスニーカー", "クリスタルの置物", "ミントタブレット", "お守り", "特製お餅"]
+
+# 初期化
+if 'drawn' not in st.session_state:
+    st.session_state.drawn = False
+if 'result' not in st.session_state:
+    st.session_state.result = None
+
+# ヘッダー表示
+st.markdown('<div class="title-text">🎍 新春おみくじ 🎍</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle-text">今年の運勢を占いましょう</div>', unsafe_allow_html=True)
+st.markdown('<div class="year-badge">🐴 2026年 午年 🐴</div>', unsafe_allow_html=True)
+
+# メインコンテンツ
+col1, col2, col3 = st.columns([1, 2, 1])
+
+with col2:
+    if not st.session_state.drawn:
+        st.write("")
+        st.info("心を落ち着けてボタンを押してください")
+        if st.button("🎋 おみくじを引く 🎋", use_container_width=True):
+            with st.spinner(\'運勢を引き寄せています...\'):
+                time.sleep(1.2)
+                # 抽選
+                types = [f for f in fortunes]
+                probs = [f[\'prob\'] for f in fortunes]
+                st.session_state.result = random.choices(types, weights=probs)[0]
+                st.session_state.drawn = True
+                st.rerun()
+    else:
+        res = st.session_state.result
+        
+        # 大吉なら紙吹雪
+        if res[\'type\'] == "大吉":
+            st.balloons()
+            st.toast("おめでとうございます！大吉です！")
+        
+        # 結果表示
+        st.markdown(f"""
+        <div class="result-card">
+            <div class="fortune-main {res[\'class\']}">{res[\'type\']}</div>
+            <p style="color: white; font-size: 1rem; line-height: 1.6;">{res[\'msg\']}</p>
+            
+            <div class="detail-grid">
+                {" ".join([f\'<div class="detail-item"><div class="detail-label">{c}</div><div class="detail-stars">{"★" * random.randint(3, 5)}{"☆" * (5 - random.randint(3, 5))}</div></div>\' for c in categories])}
+            </div>
+            
+            <div class="lucky-title">✨ 今週のラッキーアイテム ✨</div>
+            <div class="lucky-flex">
+                <div class="lucky-tag">{random.choice(lucky_items)}</div>
+                <div class="lucky-tag">ラッキーカラー: {random.choice([\'金\', \'赤\', \'白\', \'紫\'])}</div>
+                <div class="lucky-tag">ラッキーナンバー: {random.randint(1, 99)}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("🔄 もう一度引く", use_container_width=True):
+            st.session_state.drawn = False
+            st.rerun()
+
+# フッター
+st.markdown("""
+<div style="text-align: center; color: rgba(255, 255, 255, 0.4); font-size: 0.8rem; margin-top: 3rem;">
+    © 2026 新春おみくじ - 爽快に駆け抜ける一年になりますように 🐴
+</div>
+""", unsafe_allow_html=True)

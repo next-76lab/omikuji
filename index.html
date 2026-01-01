@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎍 2026年 新春おみくじ 🎍</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           2026年 新春おみくじアプリ スタイル
+           リッチなダークテーマ＋和モダンデザイン
+        ======================================== */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            /* 和風カラーパレット */
+            --gold: #D4AF37;
+            --gold-light: #F5E6A3;
+            --crimson: #C41E3A;
+            --sakura: #FFB7C5;
+            --midnight: #0a0a1a;
+            --deep-purple: #1a0a2e;
+            --accent-blue: #4a9eff;
+            --white: #fefefe;
+        }
+        
+        body {
+            font-family: 'Zen Maru Gothic', 'Noto Serif JP', serif;
+            background: linear-gradient(135deg, var(--midnight) 0%, var(--deep-purple) 50%, #1a0520 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* 背景の装飾パーティクル */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, var(--gold-light) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+            opacity: 0.3;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.6; }
+        }
+        
+        /* メインコンテナ */
+        .container {
+            text-align: center;
+            z-index: 10;
+            padding: 2rem;
+            max-width: 500px;
+            width: 95%;
+        }
+        
+        /* タイトル */
+        .title {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(212, 175, 55, 0.5);
+            margin-bottom: 0.5rem;
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+        
+        .subtitle {
+            color: var(--sakura);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .year-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--crimson), #8B0000);
+            color: var(--gold-light);
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(196, 30, 58, 0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* おみくじボックス */
+        .omikuji-box {
+            background: linear-gradient(145deg, rgba(30, 20, 50, 0.9), rgba(10, 10, 30, 0.95));
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 
+                0 0 30px rgba(212, 175, 55, 0.2),
+                inset 0 0 60px rgba(212, 175, 55, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .omikuji-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* おみくじを引くボタン */
+        .draw-button {
+            position: relative;
+            z-index: 5;
+            background: linear-gradient(135deg, var(--crimson), #8B0000);
+            color: var(--white);
+            border: none;
+            padding: 1.2rem 3rem;
+            font-size: 1.4rem;
+            font-family: 'Noto Serif JP', serif;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 6px 20px rgba(196, 30, 58, 0.5),
+                0 0 40px rgba(196, 30, 58, 0.3);
+        }
+        
+        .draw-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 10px 30px rgba(196, 30, 58, 0.6),
+                0 0 60px rgba(196, 30, 58, 0.4);
+        }
+        
+        .draw-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .draw-button.shaking {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-10px) rotate(-5deg); }
+            75% { transform: translateX(10px) rotate(5deg); }
+        }
+        
+        /* 結果表示エリア */
+        .result-area {
+            display: none;
+            position: relative;
+            z-index: 5;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .result-area.show {
+            display: block;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 運勢の大きな表示 */
+        .fortune-main {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 5rem;
+            font-weight: 900;
+            margin: 1rem 0;
+            text-shadow: 0 0 30px currentColor;
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { filter: brightness(1) drop-shadow(0 0 10px currentColor); }
+            to { filter: brightness(1.2) drop-shadow(0 0 30px currentColor); }
+        }
+        
+        .fortune-main.daikichi { color: #FFD700; }
+        .fortune-main.chuukichi { color: #FF8C00; }
+        .fortune-main.kichi { color: #32CD32; }
+        .fortune-main.shoukichi { color: #87CEEB; }
+        .fortune-main.suekichi { color: #DDA0DD; }
+        .fortune-main.kyou { color: #DC143C; }
+        
+        .fortune-message {
+            color: var(--white);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin: 1.5rem 0;
+            opacity: 0.9;
+        }
+        
+        /* 詳細運勢 */
+        .fortune-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .fortune-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .fortune-item:hover {
+            transform: translateY(-3px);
+            border-color: var(--gold);
+        }
+        
+        .fortune-item-label {
+            color: var(--gold);
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .fortune-item-value {
+            color: var(--white);
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        
+        .fortune-item-stars {
+            color: var(--gold-light);
+            font-size: 1rem;
+            letter-spacing: 2px;
+        }
+        
+        /* ラッキーアイテム */
+        .lucky-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .lucky-title {
+            color: var(--sakura);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .lucky-items {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .lucky-item {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+            border: 1px solid var(--gold);
+            border-radius: 10px;
+            padding: 0.8rem 1.2rem;
+            text-align: center;
+        }
+        
+        .lucky-item-emoji {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        
+        .lucky-item-text {
+            color: var(--gold-light);
+            font-size: 0.85rem;
+        }
+        
+        /* もう一度引くボタン */
+        .retry-button {
+            background: transparent;
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-family: 'Zen Maru Gothic', sans-serif;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .retry-button:hover {
+            background: var(--gold);
+            color: var(--midnight);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+        
+        /* フッター */
+        .footer {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            margin-top: 2rem;
+            z-index: 10;
+        }
+        
+        /* 紙吹雪アニメーション（大吉時） */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            z-index: 100;
+            animation: confetti-fall 4s linear forwards;
+        }
+        
+        @keyframes confetti-fall {
+            to {
+                top: 100vh;
+                transform: rotate(720deg);
+            }
+        }
+        
+        /* レスポンシブ */
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .fortune-main {
+                font-size: 3.5rem;
+            }
+            
+            .fortune-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .omikuji-box {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景パーティクル -->
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <h1 class="title">🎍 新春おみくじ 🎍</h1>
+        <p class="subtitle">今年の運勢を占いましょう</p>
+        <div class="year-badge">🐴 2026年 午年 🐴</div>
+        
+        <div class="omikuji-box">
+            <!-- おみくじを引く前 -->
+            <div id="beforeDraw">
+                <p style="color: var(--white); margin-bottom: 1.5rem; font-size: 1.1rem; position: relative; z-index: 5;">
+                    心を落ち着けて<br>おみくじをお引きください
+                </p>
+                <button class="draw-button" id="drawButton" onclick="drawOmikuji()">
+                    🎋 おみくじを引く 🎋
+                </button>
+            </div>
+            
+            <!-- 結果表示 -->
+            <div class="result-area" id="resultArea">
+                <div class="fortune-main" id="fortuneMain"></div>
+                <p class="fortune-message" id="fortuneMessage"></p>
+                
+                <div class="fortune-details" id="fortuneDetails"></div>
+                
+                <div class="lucky-section">
+                    <p class="lucky-title">✨ ラッキーアイテム ✨</p>
+                    <div class="lucky-items" id="luckyItems"></div>
+                </div>
+                
+                <button class="retry-button" onclick="resetOmikuji()">
+                    🔄 もう一度引く
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <p class="footer">© 2026 新春おみくじ - 素敵な一年になりますように 🌸</p>
+    
+    <script>
+        /* ========================================
+           2026年 新春おみくじアプリ ロジック
+        ======================================== */
+        
+        // 運勢データ
+        const fortunes = [
+            {
+                type: '大吉',
+                class: 'daikichi',
+                message: '最高の運勢です！2026年は天に昇る馬のように、何事もスピーディーに成就します。',
+                probability: 10
+            },
+            {
+                type: '中吉',
+                class: 'chuukichi',
+                message: 'とても良い運勢です。日々の努力が実を結ぶ一年になるでしょう。周囲との調和を大切にすると、さらなる幸運が訪れます。',
+                probability: 20
+            },
+            {
+                type: '吉',
+                class: 'kichi',
+                message: '良い運勢です。安定した一年になりそうです。焦らず着実に歩みを進めれば、確かな成果が得られるでしょう。',
+                probability: 30
+            },
+            {
+                type: '小吉',
+                class: 'shoukichi',
+                message: 'まずまずの運勢です。小さな幸せを大切にしましょう。感謝の気持ちを忘れなければ、運気は上向きになります。',
+                probability: 25
+            },
+            {
+                type: '末吉',
+                class: 'suekichi',
+                message: '徐々に運気が上がっていきます。年の後半に向けて良いことが起こりそうです。今は力を蓄える時期です。',
+                probability: 10
+            },
+            {
+                type: '凶',
+                class: 'kyou',
+                message: '注意が必要な時期ですが、心配することはありません。慎重に行動し、周囲の助言に耳を傾ければ、難を逃れることができます。',
+                probability: 5
+            }
+        ];
+        
+        // 各カテゴリの運勢
+        const categories = {
+            love: {
+                label: '💕 恋愛運',
+                options: ['最高潮', '順調', '良好', 'まあまあ', '発展中', '静観を']
+            },
+            work: {
+                label: '💼 仕事運',
+                options: ['大成功', '好調', '安定', '努力次第', '成長期', '忍耐を']
+            },
+            health: {
+                label: '🏃 健康運',
+                options: ['絶好調', '元気', '良好', '普通', '休息を', '要注意']
+            },
+            money: {
+                label: '💰 金運',
+                options: ['大金運', '上昇中', '安定', '普通', '節約を', '慎重に']
+            },
+            study: {
+                label: '📚 学業運',
+                options: ['天才的', '好調', '集中吉', '普通', '復習を', '基礎固め']
+            },
+            travel: {
+                label: '✈️ 旅行運',
+                options: ['最高', '吉方位多', '良好', '普通', '近場が◎', '控えめに']
+            }
+        };
+        
+        // ラッキーアイテムデータ
+        const luckyColors = ['赤', '金', '白', '紫', '青', '緑', '黄', 'オレンジ', 'ピンク', '黒'];
+        const luckyNumbers = ['3', '7', '8', '9', '11', '22', '33', '77', '88', '108'];
+        const luckyDirections = ['東', '西', '南', '北', '東南', '北西', '南西', '東北'];
+        const luckyItems = ['鏡', '植物', '水晶', '手帳', '時計', 'アクセサリー', '本', '傘', 'お守り', '写真'];
+        const luckyFoods = ['お餅', '蕎麦', '寿司', 'うなぎ', '抹茶', 'りんご', 'みかん', '栗', '海老', '鯛'];
+        
+        // 背景パーティクル生成
+        function createParticles() {
+            const container = document.getElementById(\'particles\');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement(\'div\');
+                particle.className = \'particle\';
+                particle.style.width = Math.random() * 100 + 50 + \'px\';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + \'%\';
+                particle.style.top = Math.random() * 100 + \'%\';
+                particle.style.animationDelay = Math.random() * 10 + \'s\';
+                particle.style.animationDuration = 10 + Math.random() * 10 + \'s\';
+                container.appendChild(particle);
+            }
+        }
+        
+        // 紙吹雪エフェクト（大吉時）
+        function createConfetti() {
+            const colors = [\'#FFD700\', \'#FF6B6B\', \'#4ECDC4\', \'#FFE66D\', \'#FF8C94\', \'#A8E6CF\'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement(\'div\');
+                    confetti.className = \'confetti\';
+                    confetti.style.left = Math.random() * 100 + \'%\';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.borderRadius = Math.random() > 0.5 ? \'50%\' : \'0\';
+                    confetti.style.animationDuration = 3 + Math.random() * 2 + \'s\';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 5000);
+                }, i * 50);
+            }
+        }
+        
+        // ランダム選択ヘルパー
+        function randomPick(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+        
+        // 重み付きランダム選択
+        function weightedRandomPick(items) {
+            const totalWeight = items.reduce((sum, item) => sum + item.probability, 0);
+            let random = Math.random() * totalWeight;
+            
+            for (const item of items) {
+                random -= item.probability;
+                if (random <= 0) return item;
+            }
+            return items[items.length - 1];
+        }
+        
+        // 星評価を生成
+        function generateStars(maxStars = 5) {
+            const filled = Math.floor(Math.random() * maxStars) + 1;
+            return \'★\'.repeat(filled) + \'☆\'.repeat(maxStars - filled);
+        }
+        
+        // 運勢に応じた星の数を決定
+        function getStarsForFortune(fortuneType, category) {
+            const baseStars = {
+                \'大吉\': { min: 4, max: 5 },
+                \'中吉\': { min: 3, max: 5 },
+                \'吉\': { min: 3, max: 4 },
+                \'小吉\': { min: 2, max: 4 },
+                \'末吉\': { min: 2, max: 3 },
+                \'凶\': { min: 1, max: 3 }
+            };
+            
+            const range = baseStars[fortuneType] || { min: 2, max: 4 };
+            const stars = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+            return \'★\'.repeat(stars) + \'☆\'.repeat(5 - stars);
+        }
+        
+        // おみくじを引く
+        function drawOmikuji() {
+            const button = document.getElementById(\'drawButton\');
+            button.classList.add(\'shaking\');
+            button.disabled = true;
+            
+            // シェイクアニメーション後に結果表示
+            setTimeout(() => {
+                button.classList.remove(\'shaking\');
+                showResult();
+            }, 600);
+        }
+        
+        // 結果表示
+        function showResult() {
+            const fortune = weightedRandomPick(fortunes);
+            
+            // メイン運勢
+            const fortuneMain = document.getElementById(\'fortuneMain\');
+            fortuneMain.textContent = fortune.type;
+            fortuneMain.className = \'fortune-main \' + fortune.class;
+            
+            // メッセージ
+            document.getElementById(\'fortuneMessage\').textContent = fortune.message;
+            
+            // 詳細運勢
+            const detailsContainer = document.getElementById(\'fortuneDetails\');
+            detailsContainer.innerHTML = \'\';
+            
+            Object.entries(categories).forEach(([key, cat]) => {
+                const item = document.createElement(\'div\');
+                item.className = \'fortune-item\';
+                item.innerHTML = `
+                    <div class="fortune-item-label">${cat.label}</div>
+                    <div class="fortune-item-stars">${getStarsForFortune(fortune.type, key)}</div>
+                `;
+                detailsContainer.appendChild(item);
+            });
+            
+            // ラッキーアイテム
+            const luckyContainer = document.getElementById(\'luckyItems\');
+            luckyContainer.innerHTML = `
+                <div class="lucky-item">
+                    <span class="lucky-item-emoji">🎨</span>
+                    <span class="lucky-item-text">色: ${randomPick(luckyColors)}</span>
+                </div>
+                <div class="lucky-item">
+                    <span class="lucky-item-emoji">🔢</span>
+                    <span class="lucky-item-text">数字: ${randomPick(luckyNumbers)}</span>
+                </div>
+                <div class="lucky-item">
+                    <span class="lucky-item-emoji">🧭</span>
+                    <span class="lucky-item-text">方角: ${randomPick(luckyDirections)}</span>
+                </div>
+                <div class="lucky-item">
+                    <span class="lucky-item-emoji">🍀</span>
+                    <span class="lucky-item-text">${randomPick(luckyItems)}</span>
+                </div>
+                <div class="lucky-item">
+                    <span class="lucky-item-emoji">🍴</span>
+                    <span class="lucky-item-text">${randomPick(luckyFoods)}</span>
+                </div>
+            `;
+            
+            // 表示切り替え
+            document.getElementById(\'beforeDraw\').style.display = \'none\';
+            document.getElementById(\'resultArea\').classList.add(\'show\');
+            
+            // 大吉の場合は紙吹雪
+            if (fortune.type === \'大吉\') {
+                createConfetti();
+            }
+        }
+        
+        // リセット
+        function resetOmikuji() {
+            document.getElementById(\'beforeDraw\').style.display = \'block\';
+            document.getElementById(\'resultArea\').classList.remove(\'show\');
+            document.getElementById(\'drawButton\').disabled = false;
+        }
+        
+        // 初期化
+        document.addEventListener(\'DOMContentLoaded\', () => {
+            createParticles();
+        });
+    </script>
+</body>
+</html>
